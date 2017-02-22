@@ -9,6 +9,8 @@
 #include "AppDelegate.h"
 #include "MainScene.h"
 
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>       /* time */
 
 USING_NS_CC;
 
@@ -24,6 +26,9 @@ AppDelegate::~AppDelegate()
 
 bool AppDelegate::applicationDidFinishLaunching()
 {
+    // seed the random number generator
+    srand (static_cast <unsigned> (time(0)));
+    
     // initialize director
     auto director = Director::getInstance();
     auto glview = director->getOpenGLView();

@@ -37,12 +37,18 @@ public:
     void onMouseMove( cocos2d::Event *event );
     // mouse scroll
     void onMouseScroll( cocos2d::Event *event );
+    
+    // Menu
+    void onQuit (cocos2d::Ref *sender);
  
 private:
  
     // Test to see if the mouse is over the player circle
     bool pointInCircle( const cocos2d::Point &p );
     cocos2d::Point getMousePositionFromEvent( cocos2d::Event *event );
+    
+    // Game state functions
+    void startNewGame ();
     
 private:
     
@@ -54,11 +60,29 @@ private:
     // Player circle to drag about
     cocos2d::DrawNode *circle;
     
+    // Wall for the ball to bounce off of
+    cocos2d::DrawNode *wall;
+    
+    // Character to fling the ball too
+    cocos2d::Sprite *sprite_as_target;
+    cocos2d::Sprite *sprite_on_target;
+    cocos2d::Sprite *sprite_hit;
+    
+    // Final resting place of the ball once thrown
+    cocos2d::DrawNode *endPoint;
+    
     // Has the player picked the circle up
     bool pickedCircle;
     
     // Position of the mouse when the button is held down
     cocos2d::Point mousePos;
+    
+    // Position for the circle to bounce off of along the top of the screen
+    cocos2d::Point bouncePoint;
+    
+    // Angles denoted by lines
+    cocos2d::DrawNode *incident;
+    cocos2d::DrawNode *reflect;
 };
 
 #endif

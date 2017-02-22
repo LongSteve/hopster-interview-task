@@ -40,6 +40,8 @@ public:
     
     // Menu
     void onQuit (cocos2d::Ref *sender);
+    void onFire (cocos2d::Ref *sender);
+    void fireEnd ();
  
 private:
  
@@ -74,6 +76,12 @@ private:
     // Has the player picked the circle up
     bool pickedCircle;
     
+    // Player has taken the shot
+    bool shotTaken;
+    
+    // Is the shot on target?
+    bool onTarget;
+        
     // Position of the mouse when the button is held down
     cocos2d::Point mousePos;
     

@@ -29,9 +29,6 @@ bool MainScene::init()
         return false;
     }
     
-    // Member variable init
-    pickedCircle = false;
-    
     // get visible size of window
     visibleSize = Director::getInstance()->getVisibleSize();
  
@@ -45,27 +42,37 @@ bool MainScene::init()
     bomb_sprite_normal->setScale (0.5f);
     bomb_sprite_selected->setScale (0.5f);
     Size sz = bomb_sprite_normal->getContentSize();
-    auto bomb = MenuItemSprite::create ( bomb_sprite_normal, bomb_sprite_selected, CC_CALLBACK_0(MainScene::onQuit, this, std::placeholders::_1) );
-    auto menu = Menu::create( bomb, nullptr );
-    menu->alignItemsVertically();
-    // menu position is normally the center of the screen.
-    Size mz = menu->getContentSize();
-    menu->setPosition (visibleSize.width , visibleSize.height);
-    this->addChild (menu);
+    auto bombMenuItem = MenuItemSprite::create ( bomb_sprite_normal, bomb_sprite_selected, CC_CALLBACK_0(MainScene::onQuit, this, std::placeholders::_1) );
     
     // Create a 'fire' button in the bottom left of the screen to fire the ball with
     Vector<SpriteFrame *>fireFrames(2);
     fireFrames.pushBack( SpriteFrame::create( "Flame1.png", Rect( 0,0,230,291 ) ) );
     fireFrames.pushBack( SpriteFrame::create( "Flame2.png", Rect( 0,0,230,291 ) ) );
-    auto fireSprite = Sprite::create();
     auto fireAnimation = Animation::createWithSpriteFrames( fireFrames, 0.2f );
     fireAnimation->setLoops( -1 );
     auto animate = Animate::create( fireAnimation );
+    auto fireSprite = Sprite::create();
     fireSprite->runAction( animate );
     fireSprite->setScale( 0.4f );
-    fireSprite->setAnchorPoint( Vec2( 0,0 ) );
-    fireSprite->setPosition( 0, 0 );
-    this->addChild( fireSprite );
+    fireSprite->setContentSize( Size( 230 * 0.4, 291 * 0.4 ) );
+
+    auto fireSpriteSelect = Sprite::create();
+    fireSpriteSelect->runAction( animate->clone() );
+    fireSpriteSelect->setScale( 0.4f );
+    fireSpriteSelect->setContentSize( Size( 230 * 0.4, 291 * 0.4 ) );
+    fireSpriteSelect->setColor( Color3B( 0,200,0 ) );
+    auto fireMenuItem = MenuItemSprite::create (fireSprite, fireSpriteSelect, CC_CALLBACK_0(MainScene::onFire, this, std::placeholders::_1) );
+    
+    // add a menu item to handle clicking on the bomb or the fire
+    auto menu = Menu::create( fireMenuItem, bombMenuItem, nullptr );
+    menu->alignItemsHorizontallyWithPadding( 100.0f );
+    Size mz = menu->getContentSize();
+
+    // Take into account the menu is normally slapped in the center of the screen
+    fireMenuItem->setPosition(-visibleSize.width / 2 + (230 * 0.2), -visibleSize.height / 2 + (291 * 0.2) + 10);
+    bombMenuItem->setPosition(visibleSize.width / 2 - 10, visibleSize.height / 2);
+    
+    this->addChild (menu);
     
     // Load the red blob sprite for the 'target'
     sprite_as_target = Sprite::create( "Petal-Happy.png" );
@@ -133,7 +140,7 @@ void MainScene::startNewGame()
     circle = DrawNode::create ();
     circle->drawDot( Vec2 (0,0), CIRCLE_RADIUS, CIRCLE_REST_COLOR );
     circle->setPosition( CIRCLE_RADIUS * 4, CIRCLE_RADIUS * 4);
-    this->addChild (circle);
+    this->addChild (circle, 200);
     
     // The point it will bounce off of, at a random position on the top of the screen
     int rMax = visibleSize.width - WALL_LENGTH;
@@ -167,10 +174,19 @@ void MainScene::startNewGame()
     endPoint->drawDot( Vec2 (0,0), CIRCLE_RADIUS, TARGET_COLOR );
     endPoint->setPosition( CIRCLE_RADIUS, CIRCLE_RADIUS );
     this->addChild (endPoint);
+    
+    pickedCircle = false;
+    shotTaken = false;
+    onTarget = false;
 }
 
 void MainScene::update( float delta )
 {
+    if( shotTaken )
+    {
+        return;
+    }
+    
     // Is the player moving the circle around
     if( pickedCircle )
     {
@@ -223,11 +239,13 @@ void MainScene::update( float delta )
     {
         sprite_as_target->setVisible( false );
         sprite_on_target->setVisible( true );
+        onTarget = true;
     }
     else
     {
         sprite_as_target->setVisible( true );
         sprite_on_target->setVisible( false );
+        onTarget = false;
     }
     
     endPoint->setPosition( target );
@@ -238,6 +256,52 @@ void MainScene::update( float delta )
 void MainScene::onQuit(Ref *sender)
 {
     cocos2d::log ("quit game");
+}
+
+void MainScene::onFire(Ref *sender)
+{
+    if( shotTaken )
+    {
+        return;
+    }
+    
+    // trigger the ball moving
+    shotTaken = true;
+    
+    // Hide the lines
+    reflect->setVisible( false );
+    incident->setVisible( false );
+    endPoint->setVisible( false );
+    
+    // Calculate the ball movement path
+    auto r_start = wall->getPosition();
+    r_start.x += WALL_LENGTH / 2;
+    auto movement1 = MoveTo::create (1.0f, r_start);
+    auto ease1 = EaseIn::create (movement1, 0.75f);
+    auto movement2 = MoveTo::create (1.0f, endPoint->getPosition());
+    auto ease2 = EaseIn::create (movement2, 0.75f);
+    auto complete = CallFunc::create( [&] ( ) {
+        this->fireEnd ();
+    });
+    auto sequence = Sequence::create (ease1, ease2, complete, nullptr);
+    circle->runAction (sequence);
+}
+
+void MainScene::fireEnd ()
+{    
+    circle->runAction (ScaleTo::create (0.5f, 0.0f));
+
+    if( onTarget )
+    {
+        sprite_as_target->setVisible( false );
+        sprite_on_target->setVisible( false );
+        sprite_hit->setVisible( true );
+        cocos2d::log ("target hit");
+    }
+    else
+    {
+        cocos2d::log ("target missed");
+    }
 }
 
 #pragma mark - Private Methods
@@ -270,6 +334,11 @@ Point MainScene::getMousePositionFromEvent( Event *event )
 
 void MainScene::onMouseDown( Event *event )
 {
+    if( shotTaken )
+    {
+        return;
+    }
+    
     Point pos = getMousePositionFromEvent (event);
     if (pointInCircle (pos))
     {
@@ -288,6 +357,11 @@ void MainScene::onMouseUp( Event *event )
 
 void MainScene::onMouseMove( Event *event )
 {
+    if( shotTaken )
+    {
+        return;
+    }
+
     // Cocos2d-x returns mouse coordinates in OpenGL space, which has the y axis inverted.  Not sure why this is!
     Point pos = getMousePositionFromEvent (event);
     

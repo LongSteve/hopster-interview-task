@@ -1,8 +1,8 @@
 //
 //  MainScene.cpp
-//  ExpJam
+//  Hopster Coding Interview
 //
-//  Created by Two Tails on 09/12/2014.
+//  Created by Steve Longhurst on 22/02/2017.
 //
 //
 
@@ -13,6 +13,11 @@ USING_NS_CC;
 
 #define CIRCLE_RADIUS 40
 
+#define BACKGROUND_COLOR Color4B (128,128,128,255)
+#define CIRCLE_REST_COLOR Color4F (0.5,0,0,1.0)
+#define CIRCLE_HOVER_COLOR Color4F (0.0,1.0,0,1.0)
+#define CIRCLE_PICKED_COLOR Color4F (0.0,0.0,1.0,1.0)
+
 // on "init" you need to initialize your instance
 bool MainScene::init()
 {
@@ -22,16 +27,19 @@ bool MainScene::init()
         return false;
     }
     
+    // Member variable init
+    pickedCircle = false;
+    
     // get visible size of window
     visibleSize = Director::getInstance()->getVisibleSize();
  
     // Background colour
-    LayerColor *lc = LayerColor::create (Color4B (128,128,128,255));
+    LayerColor *lc = LayerColor::create (BACKGROUND_COLOR);
     this->addChild (lc);
  
     // A circle for the player to drag about
     circle = DrawNode::create ();
-    circle->drawDot (Vec2 (0,0), CIRCLE_RADIUS, Color4F (0.5,0,0,1.0));
+    circle->drawDot (Vec2 (0,0), CIRCLE_RADIUS, CIRCLE_REST_COLOR);
     this->addChild (circle);
  
     // done
@@ -73,7 +81,7 @@ void MainScene::onExit()
 void MainScene::update( float delta )
 {
     // Is the player moving the circle around
-    if( picked )
+    if( pickedCircle )
     {
         // Limit the circle position
         if( mousePos.x >= 0 && mousePos.x < visibleSize.width && mousePos.y >= 0 && mousePos.y < visibleSize.height)
@@ -117,15 +125,15 @@ void MainScene::onMouseDown( Event *event )
     if (pointInCircle (pos))
     {
         circle->clear();
-        circle->drawDot( Vec2 (0,0), CIRCLE_RADIUS, Color4F (0.0,0.0,1.0,1.0) );
-        picked = true;
+        circle->drawDot( Vec2 (0,0), CIRCLE_RADIUS, CIRCLE_PICKED_COLOR );
+        pickedCircle = true;
     }
     mousePos = pos;
 }
 
 void MainScene::onMouseUp( Event *event )
 {
-    picked = false;
+    pickedCircle = false;
 }
 
 void MainScene::onMouseMove( Event *event )
@@ -137,19 +145,12 @@ void MainScene::onMouseMove( Event *event )
     if (pointInCircle (pos))
     {
         circle->clear ();
-        if( picked )
-        {
-           circle->drawDot( Vec2 (0,0), CIRCLE_RADIUS, Color4F (0.0,0.0,1.0,1.0) );
-        }
-        else
-        {
-            circle->drawDot (Vec2 (0,0), CIRCLE_RADIUS, Color4F (0.0,1.0,0,1.0));
-        }
+        circle->drawDot( Vec2 (0,0), CIRCLE_RADIUS, pickedCircle ? CIRCLE_PICKED_COLOR : CIRCLE_HOVER_COLOR);
     }
     else
     {
         circle->clear ();
-        circle->drawDot (Vec2 (0,0), CIRCLE_RADIUS, Color4F (0.5,0.0,0,1.0));
+        circle->drawDot (Vec2 (0,0), CIRCLE_RADIUS, CIRCLE_REST_COLOR);
     }
     
     mousePos = pos;

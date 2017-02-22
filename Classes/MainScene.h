@@ -1,8 +1,8 @@
 //
 //  MainScene.h
-//  ExpJam
+//  Hopster Coding Interview
 //
-//  Created by Two Tails on 09/12/2014.
+//  Created by Steve Longhurst on 22/02/2017.
 //
 //
 
@@ -55,7 +55,7 @@ private:
     cocos2d::DrawNode *circle;
     
     // Has the player picked the circle up
-    bool picked;
+    bool pickedCircle;
     
     // Position of the mouse when the button is held down
     cocos2d::Point mousePos;

@@ -1,8 +1,8 @@
 //
 //  AppDelegate.cpp
-//  ExpJam
+//  Hopster Coding Interview
 //
-//  Created by Two Tails on 09/12/2014.
+//  Created by Steve Longhurst on 22/02/2017.
 //
 //
 

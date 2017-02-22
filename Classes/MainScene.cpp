@@ -6,8 +6,9 @@
 //
 //
 
-#include "MainScene.h"
 #include "Constants.h"
+#include "MenuScene.h"
+#include "MainScene.h"
 
 USING_NS_CC;
 
@@ -86,6 +87,19 @@ bool MainScene::init()
     sprite_hit->setVisible( false );
     this->addChild (sprite_hit, 100);
     
+    // Some background fauna, like the menu
+    auto leaf1 = Sprite::create ("Leaf1.png");
+    leaf1->setAnchorPoint (Vec2 (0,1));
+    leaf1->setPosition (0, visibleSize.height);
+    leaf1->setOpacity(128);
+    this->addChild (leaf1);
+
+    auto leaf6 = Sprite::create ("Leaf6.png");
+    leaf6->setAnchorPoint (Vec2 (1,0));
+    leaf6->setPosition (visibleSize.width, 0);
+    leaf6->setOpacity(128);
+    this->addChild (leaf6);
+    
     // done
     return true;
 }
@@ -132,6 +146,11 @@ void MainScene::startNewGame()
     circle->drawDot( Vec2 (0,0), CIRCLE_RADIUS, CIRCLE_REST_COLOR );
     circle->setPosition( CIRCLE_RADIUS * 4, CIRCLE_RADIUS * 4);
     this->addChild (circle, 200);
+    
+    // Add a nice sprite to the circle
+    auto spike_ball = Sprite::create( "SpikeBall1.png" );
+    spike_ball->setScale( 0.75f );
+    circle->addChild (spike_ball);
     
     // The point it will bounce off of, at a random position on the top of the screen
     int rMax = visibleSize.width - WALL_LENGTH;
@@ -247,6 +266,8 @@ void MainScene::update( float delta )
 void MainScene::onQuit(Ref *sender)
 {
     cocos2d::log ("quit game");
+    auto scene = MenuScene::create ();
+    Director::getInstance ()->replaceScene (TransitionFade::create (0.5, scene, Color3B (0,0,0)));
 }
 
 void MainScene::onFire(Ref *sender)
@@ -276,6 +297,10 @@ void MainScene::onFire(Ref *sender)
     });
     auto sequence = Sequence::create (ease1, ease2, complete, nullptr);
     circle->runAction (sequence);
+    
+    auto spike_ball = circle->getChildren().at (0);
+    auto rotate = RotateBy::create( 1.0f, 360.0f);
+    spike_ball->runAction( RepeatForever::create( rotate ) );
 }
 
 void MainScene::fireEnd ()

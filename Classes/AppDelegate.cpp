@@ -7,7 +7,7 @@
 //
 
 #include "AppDelegate.h"
-#include "MainScene.h"
+#include "SplashScene.h"
 
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
@@ -45,7 +45,7 @@ bool AppDelegate::applicationDidFinishLaunching()
     director->setAnimationInterval( 1.0 / 60.0f );
 
     // create and run scene. it's an autorelease object
-    auto scene = MainScene::create();
+    auto scene = SplashScene::create();
     director->runWithScene( scene );
 
     return true;

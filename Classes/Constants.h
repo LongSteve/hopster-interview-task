@@ -9,6 +9,8 @@
 #ifndef __CONSTANTS_H__
 #define __CONSTANTS_H__
 
+#include <stdlib.h>     /* srand, rand */
+
 #define FONT_TTF_FILE "Marker Felt.ttf"
 
 #define CIRCLE_RADIUS 30

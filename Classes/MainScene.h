@@ -59,6 +59,9 @@ private:
     // Store the display area size for good measure
     cocos2d::Size visibleSize;
  
+    // Some game over text
+    cocos2d::Label *finishedLabel;
+ 
     // Player circle to drag about
     cocos2d::DrawNode *circle;
     

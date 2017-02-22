@@ -7,18 +7,9 @@
 //
 
 #include "MainScene.h"
+#include "Constants.h"
 
 USING_NS_CC;
-
-#define CIRCLE_RADIUS 30
-#define WALL_LENGTH 200
-
-#define BACKGROUND_COLOR Color4B (128,128,128,255)
-#define CIRCLE_REST_COLOR Color4F (0.5,0,0,1.0)
-#define CIRCLE_HOVER_COLOR Color4F (0.0,1.0,0,1.0)
-#define CIRCLE_PICKED_COLOR Color4F (0.0,0.0,1.0,1.0)
-
-#define TARGET_COLOR Color4F (0.5, 0.5, 0.0, 0.4)
 
 // on "init" you need to initialize your instance
 bool MainScene::init()
@@ -288,20 +279,34 @@ void MainScene::onFire(Ref *sender)
 }
 
 void MainScene::fireEnd ()
-{    
+{
     circle->runAction (ScaleTo::create (0.5f, 0.0f));
+    std::string finishedText;
 
     if( onTarget )
     {
+        finishedText = "Well Done - 100 Points";
+        
         sprite_as_target->setVisible( false );
         sprite_on_target->setVisible( false );
         sprite_hit->setVisible( true );
-        cocos2d::log ("target hit");
     }
     else
     {
-        cocos2d::log ("target missed");
+        finishedText = "Unlucky - 0 Points";
     }
+    
+    finishedLabel = Label::createWithTTF(finishedText, FONT_TTF_FILE, 72);
+    finishedLabel->setPosition(visibleSize.width / 2, visibleSize.height / 2);
+    finishedLabel->setScale (0.0f);
+    
+    auto complete = CallFunc::create( [&] ( ) {
+        this->onQuit (NULL);
+    });
+    
+    auto sequence = Sequence::create( EaseBounceOut::create(ScaleTo::create(1.0f, 1.0f)), DelayTime::create (2.0f), complete, nullptr );
+    finishedLabel->runAction (sequence);
+    this->addChild (finishedLabel, 500);
 }
 
 #pragma mark - Private Methods

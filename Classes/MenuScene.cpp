@@ -8,6 +8,7 @@
 
 #include "MenuScene.h"
 #include "MainScene.h"
+#include "HelpScene.h"
 
 USING_NS_CC;
 
@@ -81,6 +82,8 @@ void MenuScene::onStart (Ref *sender)
 
 void MenuScene::onHelp (Ref *sender)
 {
+    auto helpScene = HelpScene::create ();
+    Director::getInstance ()->replaceScene (TransitionFade::create (0.5, helpScene, Color3B (0,0,0)));
 }
 
 void MenuScene::onQuit (Ref *sender)

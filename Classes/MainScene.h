@@ -28,12 +28,7 @@ public:
     
     // called once per frame
     virtual void update( float delta );
-    
-    // key pressed event
-    void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event);
-    // key lifted event
-    void onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event);
-    
+        
     // mouse pressed down
     void onMouseDown( cocos2d::Event *event );
     // mouse button lifted
@@ -42,12 +37,28 @@ public:
     void onMouseMove( cocos2d::Event *event );
     // mouse scroll
     void onMouseScroll( cocos2d::Event *event );
-    
+ 
+private:
+ 
+    // Test to see if the mouse is over the player circle
+    bool pointInCircle( const cocos2d::Point &p );
+    cocos2d::Point getMousePositionFromEvent( cocos2d::Event *event );
     
 private:
     
-    cocos2d::EventListenerKeyboard* _keyEventListener = NULL;
     cocos2d::EventListenerMouse* _mouseEventListener = NULL;
+ 
+    // Store the display area size for good measure
+    cocos2d::Size visibleSize;
+ 
+    // Player circle to drag about
+    cocos2d::DrawNode *circle;
+    
+    // Has the player picked the circle up
+    bool picked;
+    
+    // Position of the mouse when the button is held down
+    cocos2d::Point mousePos;
 };
 
 #endif
